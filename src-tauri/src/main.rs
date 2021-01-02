@@ -1,15 +1,19 @@
 #![cfg_attr(
-all(not(debug_assertions), target_os = "windows"),
-windows_subsystem = "windows"
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
 )]
 
 mod cmd;
 
+#[cfg(target_os = "windows")]
+use winapi::um::shellscalingapi::{SetProcessDpiAwareness, PROCESS_PER_MONITOR_DPI_AWARE};
+
 fn main() {
     #[cfg(target_os = "windows")]
-        unsafe {
-        winapi::um::shellscalingapi::SetProcessDpiAwareness(2);
+    unsafe {
+        SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
     }
+
     tauri::AppBuilder::new()
         .invoke_handler(|_webview, arg| {
             use cmd::Cmd::*;
