@@ -17,6 +17,9 @@ tauri = { version = "0.10.0", features = [ "event", "notification" ] }
 [target."cfg(windows)".build-dependencies]
 winres = "0.1.11"
 
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = [ "shellscalingapi" ] }
+
 [features]
 embedded-server = [ "tauri/embedded-server" ]
 no-server = [ "tauri/no-server" ]

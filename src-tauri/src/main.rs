@@ -1,11 +1,15 @@
 #![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
+all(not(debug_assertions), target_os = "windows"),
+windows_subsystem = "windows"
 )]
 
 mod cmd;
 
 fn main() {
+    #[cfg(target_os = "windows")]
+        unsafe {
+        winapi::um::shellscalingapi::SetProcessDpiAwareness(2);
+    }
     tauri::AppBuilder::new()
         .invoke_handler(|_webview, arg| {
             use cmd::Cmd::*;
