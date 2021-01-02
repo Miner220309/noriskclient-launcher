@@ -39,7 +39,8 @@
       "exceptionDomain": ""
     },
     "allowlist": {
-      "all": true
+      "event": true,
+      "notification": true
     },
     "window": {
       "title": "NoRiskClient",
