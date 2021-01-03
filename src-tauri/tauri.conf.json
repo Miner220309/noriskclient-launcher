@@ -39,7 +39,9 @@
       "exceptionDomain": ""
     },
     "allowlist": {
-      "all": true
+      "event": true,
+      "notification": true,
+      "readTextFile": true
     },
     "window": {
       "title": "NoRisk Client",
