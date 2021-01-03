@@ -13,14 +13,14 @@ interface ISwitchAccountMenu {
     anchorEl: HTMLElement | null;
 }
 
-export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
+export const SwitchAccountMenu = async (props: ISwitchAccountMenu) => {
     const [accounts, setAccounts] = useState<Array<LauncherProfile>>();
     useEffect(() => {
         const fetchUserProfiles = async () => {
             const mcDir = await promisified({cmd: "minecraftDir"});
             const profiles = await readTextFile(`${mcDir}/launcher_accounts.json`);
             const profilesData = await JSON.parse(profiles);
-            setAccounts(await Object.entries(profilesData.accounts).map(value => {
+            setAccounts(Object.entries(profilesData.accounts).map(value => {
                 return value[1] as LauncherProfile;
             }))
         }
@@ -41,6 +41,7 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
             }}
             open={props.open}
             onClose={props.handleClose}>
+            
             {accounts?.map(account => {
                 return (
                     <MenuItem key={account.minecraftProfile.id} onClick={() => {
