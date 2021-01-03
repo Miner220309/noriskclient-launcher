@@ -9,80 +9,80 @@ import {SwitchAccountMenu} from "./SwitchAccountMenu";
 import {LauncherProfile} from "../interfaces/LauncherAccount";
 
 const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            flexGrow: 1,
-        },
-        menuButton: {
-            marginRight: theme.spacing(1),
-        },
-        title: {
-            flexGrow: 1,
-        },
-        avatar: {
-            boxShadow: theme.shadows[3],
-        },
-        username: {
-            marginRight: "0.5em",
-        },
-        toolbarButtons: {
-            marginLeft: 'auto',
-        },
-    }),
+  createStyles({
+    root: {
+      flexGrow: 1,
+    },
+    menuButton: {
+      marginRight: theme.spacing(1),
+    },
+    title: {
+      flexGrow: 1,
+    },
+    avatar: {
+      boxShadow: theme.shadows[3],
+    },
+    username: {
+      marginRight: "0.5em",
+    },
+    toolbarButtons: {
+      marginLeft: 'auto',
+    },
+  }),
 );
 
 interface Props {
-    profile: LauncherProfile;
-    setProfile: (profile: LauncherProfile) => void;
+  profile: LauncherProfile;
+  setProfile: (profile: LauncherProfile) => void;
 }
 
 export const NavBar = (props: Props) => {
-    const classes = useStyles();
-    const [auth, setAuth] = React.useState(true);
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
+  const classes = useStyles();
+  const [auth, setAuth] = React.useState(true);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
-    const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
-    return (
-        <div className={classes.root}>
-            <AppBar position="static">
-                <Toolbar>
-                    <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-                        <MenuIcon/>
-                    </IconButton>
-                    {props.profile && (
-                        <div style={{display: "flex", alignItems: "center", marginLeft: "auto"}}>
-                            <Typography variant={"h6"}>{props.profile?.minecraftProfile?.name}</Typography>
-                            <>
-                                <IconButton
-                                    aria-label="account of current user"
-                                    aria-controls="menu-appbar"
-                                    aria-haspopup="true"
-                                    onClick={handleMenu}
-                                    color="inherit">
-                                    <Avatar
-                                        className={classes.avatar}
-                                        variant={"square"} alt="Remy Sharp"
-                                        src={props?.profile?.minecraftProfile?.id
-                                            ?
-                                            "https://crafatar.com/avatars/" + props.profile.minecraftProfile.id
-                                            :
-                                            "https://crafatar.com/avatars/54f04497-5693-48b9-b5de-70db3b6159d5"}/>
-                                </IconButton>
-                                <SwitchAccountMenu switchProfile={props?.setProfile} open={open}
-                                                   handleClose={handleClose} anchorEl={anchorEl}/>
-                            </>
-                        </div>
-                    )}
-                </Toolbar>
-            </AppBar>
-        </div>
-    );
+  return (
+    <div className={classes.root}>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+            <MenuIcon/>
+          </IconButton>
+          {props.profile && (
+            <div style={{display: "flex", alignItems: "center", marginLeft: "auto"}}>
+              <Typography variant={"h6"}>{props.profile?.minecraftProfile?.name}</Typography>
+              <>
+                <IconButton
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenu}
+                  color="inherit">
+                  <Avatar
+                    className={classes.avatar}
+                    variant={"square"} alt="Remy Sharp"
+                    src={props?.profile?.minecraftProfile?.id
+                      ?
+                      "https://crafatar.com/avatars/" + props.profile.minecraftProfile.id
+                      :
+                      "https://crafatar.com/avatars/54f04497-5693-48b9-b5de-70db3b6159d5"}/>
+                </IconButton>
+                <SwitchAccountMenu switchProfile={props?.setProfile} open={open}
+                                   handleClose={handleClose} anchorEl={anchorEl}/>
+              </>
+            </div>
+          )}
+        </Toolbar>
+      </AppBar>
+    </div>
+  );
 }

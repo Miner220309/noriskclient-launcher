@@ -5,42 +5,43 @@ import {PlayArrow} from "@material-ui/icons";
 import {LauncherProfile} from "../interfaces/LauncherAccount";
 
 const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        button: {
-            margin: theme.spacing(1),
-            position: "absolute",
-            bottom: 0,
-        },
-    })
+  createStyles({
+    button: {
+      margin: theme.spacing(1),
+      position: "absolute",
+      bottom: 0,
+    },
+  })
 );
 
 interface Props {
-    profile: LauncherProfile
+  profile: LauncherProfile
 }
 
 export const StartButton = (props: Props) => {
-    const theme = useTheme();
-    const classes = useStyles(theme);
-    return (
-        <Button
-            variant="contained"
-            color="primary"
-            className={classes.button}
-            onClick={async () => {
-                const profile = props.profile;
-                const mcDir = await promisified({cmd: "minecraftDir"});
-                const program = await mcDir + "/versions/1.8.9-NoRiskClient/natives";
-                console.log(program)
-                await invoke({
-                    cmd: 'startGame',
-                    program: "java",
-                    args: [
-                        `-Xms1024M`,
-                        `-Xmx1024M`,
-                        `-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump`,
-                        `-Djava.library.path=${program}`,
-                        `-cp`,
-                        `${mcDir}/libraries/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar;
+  const theme = useTheme();
+  const classes = useStyles(theme);
+  return (
+    <Button
+      variant="contained"
+      color="primary"
+      className={classes.button}
+      onClick={async () => {
+        const profile = props.profile;
+        const mcDir = await promisified({cmd: "minecraftDir"});
+        const program = await mcDir + "/versions/1.8.9-NoRiskClient/natives";
+        console.log(program)
+        await invoke({
+          cmd: 'startGame',
+          program: "java",
+          args: [
+            `-Xms1024M`,
+            `-Xmx1024M`,
+            `-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump`,
+            `-Djava.library.path=${program}`,
+            `-cp`,
+            `${mcDir}/libraries/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar;
+                        ${mcDir}/libraries/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar;
                         ${mcDir}/libraries/org/ow2/asm/asm-all/5.2/asm-all-5.2.jar;
                         ${mcDir}/libraries/org/jline/jline/3.5.1/jline-3.5.1.jar;
                         ${mcDir}/libraries/net/java/dev/jna/jna/4.4.0/jna-4.4.0.jar;
@@ -97,24 +98,24 @@ export const StartButton = (props: Props) => {
                         ${mcDir}/libraries/com/mojang/text2speech/1.10.3/text2speech-1.10.3.jar;
                         ${mcDir}/libraries/ca/weblite/java-objc-bridge/1.0.0/java-objc-bridge-1.0.0.jar;
                         ${mcDir}/libraries/ca/weblite/java-objc-bridge/1.0.0/java-objc-bridge-1.0.0.jar`,
-                        `net.minecraft.launchwrapper.Launch`,
-                        `--version`, "1.8.9-NoRiskClient",
-                        `--gameDir`, mcDir,
-                        `--assetsDir`, mcDir + "/assets",
-                        `--username`, profile.minecraftProfile.name,
-                        `--assetIndex`, "1.8",
-                        `--uuid`, profile.minecraftProfile.id,
-                        `--accessToken`, profile.accessToken,
-                        `--userProperties`, profile.userProperites.length === 0 ? "" : profile.userProperites.length,
-                        `--userType`, profile.type,
-                        `--tweakClass=de.noriskclient.norisk.asm.ClassTweaker`
-                    ]
-                })
-            }}
-            startIcon={<PlayArrow/>}
-        >
-            Start
-        </Button>
-    );
+            `net.minecraft.launchwrapper.Launch`,
+            `--version`, "1.8.9-NoRiskClient",
+            `--gameDir`, mcDir,
+            `--assetsDir`, mcDir + "/assets",
+            `--username`, profile.minecraftProfile.name,
+            `--assetIndex`, "1.8",
+            `--uuid`, profile.minecraftProfile.id,
+            `--accessToken`, profile.accessToken,
+            `--userProperties`, profile.userProperites.length === 0 ? "" : profile.userProperites.length,
+            `--userType`, profile.type,
+            `--tweakClass=de.noriskclient.norisk.asm.ClassTweaker`
+          ]
+        })
+      }}
+      startIcon={<PlayArrow/>}
+    >
+      Start
+    </Button>
+  );
 };
 
