@@ -1,8 +1,10 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import {Avatar} from "@material-ui/core";
-import {testAccounts} from "../Utils";
+import {readTextFile} from "tauri/api/fs";
+import {promisified} from "tauri/api/tauri";
+import {LauncherProfile} from "../interfaces/LauncherAccount";
 
 interface ISwitchAccountMenu {
     open: boolean,
@@ -11,6 +13,18 @@ interface ISwitchAccountMenu {
 }
 
 export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
+    const [accounts, setAccounts] = useState<Array<LauncherProfile>>();
+    useEffect(() => {
+        const fetchUserProfiles = async () => {
+            const mcDir = await promisified({cmd: "minecraftDir"});
+            const profiles = await readTextFile(`${mcDir}/launcher_accounts.json`);
+            const profilesData = await JSON.parse(profiles);
+            setAccounts(await Object.entries(profilesData.accounts).map(value => {
+                return value[1] as LauncherProfile;
+            }))
+        }
+        fetchUserProfiles();
+    })
     return (
         <Menu
             id="menu-appbar"
@@ -26,13 +40,15 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
             }}
             open={props.open}
             onClose={props.handleClose}>
-            {testAccounts.map(value => {
+            {accounts?.map(account => {
                 return (
-                    <MenuItem key={value.uuid} onClick={props.handleClose}>
+                    <MenuItem key={account.minecraftProfile.id} onClick={() => {
+
+                    }}>
                         <Avatar
                             variant={"square"} alt="Remy Sharp"
-                            src={"https://crafatar.com/avatars/" + value.uuid}/>
-                            <h1>{value.username}</h1>
+                            src={"https://crafatar.com/avatars/" + account.minecraftProfile.id}/>
+                        <h1>{account.minecraftProfile.name}</h1>
                     </MenuItem>
                 )
             })}
