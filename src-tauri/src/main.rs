@@ -103,7 +103,7 @@ impl Cmd {
                 tauri::execute_promise(
                     webview,
                     move || {
-                        Ok(serde_json::to_vec(
+                        Ok(serde_json::to_string(
                             &state.launcher_accounts.minecraft_accounts(),
                         )?)
                     },
