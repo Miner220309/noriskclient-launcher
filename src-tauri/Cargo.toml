@@ -13,6 +13,8 @@ build = "src/build.rs"
 serde_json = "1.0.61"
 serde = { version = "1.0.118", features = [ "derive" ] }
 tauri = { version = "0.10.0", features = [ "event", "notification", "read-text-file" ] }
+uuid = { version = "0.8.1", features = [ "serde" ] }
+platform-dirs = "0.3.0"
 
 [target."cfg(windows)".dependencies]
 winapi = { version = "0.3.9", features = [ "shellscalingapi" ] }
