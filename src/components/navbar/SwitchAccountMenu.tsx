@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import { Avatar } from "@material-ui/core";
-import { readTextFile } from "tauri/api/fs";
-import { promisified } from "tauri/api/tauri";
-import {
-  MinecraftProfile,
-  LauncherProfile,
-} from "../interfaces/LauncherAccount";
+import {Avatar} from "@material-ui/core";
+import {promisified} from "tauri/api/tauri";
+import {LauncherProfile,} from "../interfaces/LauncherAccount";
 
 interface ISwitchAccountMenu {
   open: boolean;
@@ -22,10 +18,19 @@ interface MinecraftAccount {
 }
 
 export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
-  let accounts: Array<MinecraftAccount> = [];
-  promisified({ cmd: "listAccounts" }).then((accs) => {
-    accounts = accs as Array<MinecraftAccount>;
-  });
+  const [accounts, setAccounts] = useState<Array<MinecraftAccount>>([]);
+
+  useEffect(() => {
+    //workaround but it works
+    const fetchAccounts = async () => {
+      promisified({cmd: "listAccounts"}).then((accs) => {
+        console.log(accs)
+        setAccounts(accs as Array<MinecraftAccount>)
+      });
+    }
+    fetchAccounts();
+  }, [])
+
   return (
     <Menu
       id="menu-appbar"
@@ -42,8 +47,8 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
       open={props.open}
       onClose={props.handleClose}
     >
-      {promisified({ cmd: "listAccounts" }).then((accounts) =>
-        (accounts as Array<MinecraftAccount>).map((account) => (
+      {accounts.map(account => {
+        return (
           <MenuItem
             key={account.uuid}
             onClick={() => {
@@ -57,9 +62,9 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
               src={"https://crafatar.com/avatars/" + account.uuid}
             />
             <h1>{account.name}</h1>
-          </MenuItem>
-        ))
-      )}
+          </MenuItem>)
+      })}
     </Menu>
   );
-};
+}
+
