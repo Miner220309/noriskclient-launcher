@@ -39,14 +39,13 @@
       "exceptionDomain": ""
     },
     "allowlist": {
-      "event": true,
-      "notification": true
+      "all": true
     },
     "window": {
-      "title": "NoRiskClient",
+      "title": "NoRisk Client",
       "width": 800,
       "height": 600,
-      "resizable": true,
+      "resizable": false,
       "fullscreen": false
     },
     "security": {
