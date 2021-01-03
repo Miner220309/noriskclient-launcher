@@ -8,7 +8,8 @@ import {LauncherProfile} from "../interfaces/LauncherAccount";
 
 interface ISwitchAccountMenu {
     open: boolean,
-    handleClose: () => void
+    handleClose: () => void,
+    switchProfile: (profile: LauncherProfile) => void,
     anchorEl: HTMLElement | null;
 }
 
@@ -24,7 +25,7 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
             }))
         }
         fetchUserProfiles();
-    })
+    }, [])
     return (
         <Menu
             id="menu-appbar"
@@ -43,7 +44,8 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
             {accounts?.map(account => {
                 return (
                     <MenuItem key={account.minecraftProfile.id} onClick={() => {
-
+                        props.switchProfile(account);
+                        props.handleClose();
                     }}>
                         <Avatar
                             variant={"square"} alt="Remy Sharp"

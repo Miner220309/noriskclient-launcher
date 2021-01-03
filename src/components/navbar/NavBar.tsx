@@ -4,8 +4,9 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-import {Avatar, Box, Typography} from '@material-ui/core';
+import {Avatar, Typography} from '@material-ui/core';
 import {SwitchAccountMenu} from "./SwitchAccountMenu";
+import {LauncherProfile} from "../interfaces/LauncherAccount";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -30,10 +31,14 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-export const NavBar = () => {
+interface Props {
+    profile: LauncherProfile;
+    setProfile: (profile: LauncherProfile) => void;
+}
+
+export const NavBar = (props: Props) => {
     const classes = useStyles();
     const [auth, setAuth] = React.useState(true);
-    const [username, setUsername] = React.useState("NoRisk");
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -52,9 +57,9 @@ export const NavBar = () => {
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
                         <MenuIcon/>
                     </IconButton>
-                    {auth && (
+                    {props.profile && (
                         <div style={{display: "flex", alignItems: "center", marginLeft: "auto"}}>
-                            <Typography variant={"h6"}>NoRisk</Typography>
+                            <Typography variant={"h6"}>{props.profile?.minecraftProfile?.name}</Typography>
                             <>
                                 <IconButton
                                     aria-label="account of current user"
@@ -65,9 +70,14 @@ export const NavBar = () => {
                                     <Avatar
                                         className={classes.avatar}
                                         variant={"square"} alt="Remy Sharp"
-                                        src="https://crafatar.com/avatars/26a4fcde-de39-4ff0-8ea1-786582b7d8ee"/>
+                                        src={props?.profile?.minecraftProfile?.id
+                                            ?
+                                            "https://crafatar.com/avatars/" + props.profile.minecraftProfile.id
+                                            :
+                                            "https://crafatar.com/avatars/54f04497-5693-48b9-b5de-70db3b6159d5"}/>
                                 </IconButton>
-                                <SwitchAccountMenu open={open} handleClose={handleClose} anchorEl={anchorEl}/>
+                                <SwitchAccountMenu switchProfile={props?.setProfile} open={open}
+                                                   handleClose={handleClose} anchorEl={anchorEl}/>
                             </>
                         </div>
                     )}
