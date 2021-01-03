@@ -40,8 +40,8 @@ export const StartButton = (props: Props) => {
             `-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump`,
             `-Djava.library.path=${program}`,
             `-cp`,
-            `${mcDir}/libraries/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar;
-                        ${mcDir}/libraries/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar;
+            ` ${mcDir}/libraries/de/noriskclient/NoRiskClient/1.8.9/NoRiskClient-1.8.9.jar;
+            ${mcDir}/libraries/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar;
                         ${mcDir}/libraries/org/ow2/asm/asm-all/5.2/asm-all-5.2.jar;
                         ${mcDir}/libraries/org/jline/jline/3.5.1/jline-3.5.1.jar;
                         ${mcDir}/libraries/net/java/dev/jna/jna/4.4.0/jna-4.4.0.jar;
@@ -97,7 +97,9 @@ export const StartButton = (props: Props) => {
                         ${mcDir}/libraries/com/mojang/text2speech/1.10.3/text2speech-1.10.3.jar;
                         ${mcDir}/libraries/com/mojang/text2speech/1.10.3/text2speech-1.10.3.jar;
                         ${mcDir}/libraries/ca/weblite/java-objc-bridge/1.0.0/java-objc-bridge-1.0.0.jar;
-                        ${mcDir}/libraries/ca/weblite/java-objc-bridge/1.0.0/java-objc-bridge-1.0.0.jar`,
+                        ${mcDir}/libraries/ca/weblite/java-objc-bridge/1.0.0/java-objc-bridge-1.0.0.jar;
+                        ${mcDir}/libraries/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar;
+                        ${mcDir}/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar`,
             `net.minecraft.launchwrapper.Launch`,
             `--version`, "1.8.9-NoRiskClient",
             `--gameDir`, mcDir,
