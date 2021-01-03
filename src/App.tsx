@@ -20,7 +20,6 @@ export const App = () => {
     const [profiles, setProfiles] = useState<Array<LauncherProfile>>([]);
 
     const switchProfile = () => {
-
     }
 
     useEffect(() => {
@@ -43,7 +42,7 @@ export const App = () => {
             <Box bgcolor={cyan} height={"100%"}>
                 <NavBar profile={profile} setProfile={setProfile}/>
                 <Box height={"auto"}>
-                    <StartButton/>
+                    <StartButton profile={profile}/>
                 </Box>
             </Box>
         </ThemeProvider>
