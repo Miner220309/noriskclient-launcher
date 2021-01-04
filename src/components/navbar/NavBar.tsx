@@ -6,7 +6,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import {Avatar, Typography} from '@material-ui/core';
 import {SwitchAccountMenu} from "./SwitchAccountMenu";
-import {LauncherProfile} from "../interfaces/LauncherAccount";
+import {LauncherProfile} from "../../interfaces/LauncherAccount";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

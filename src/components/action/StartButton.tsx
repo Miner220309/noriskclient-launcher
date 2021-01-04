@@ -2,7 +2,7 @@ import React from "react";
 import {Button, createStyles, makeStyles, Theme, useTheme,} from "@material-ui/core";
 import {invoke, promisified} from "tauri/api/tauri";
 import {PlayArrow} from "@material-ui/icons";
-import {LauncherProfile} from "../interfaces/LauncherAccount";
+import {LauncherProfile} from "../../interfaces/LauncherAccount";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

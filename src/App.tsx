@@ -4,10 +4,11 @@ import {NavBar} from "./components/navbar/NavBar";
 import {StartButton} from "./components/action/StartButton";
 import {Box, createMuiTheme, ThemeProvider} from "@material-ui/core";
 import {blue, cyan} from "@material-ui/core/colors";
-import {LauncherProfile} from "./components/interfaces/LauncherAccount";
+import {LauncherProfile} from "./interfaces/LauncherAccount";
 import {promisified} from "tauri/api/tauri";
 import {readTextFile} from "tauri/api/fs";
 import NoRiskBackground from "./images/main_bg.jpg"
+import {Progress} from "./components/download/Progress";
 
 const theme = createMuiTheme({
   palette: {
@@ -43,6 +44,7 @@ export const App = () => {
       <Box style={{backgroundImage: `url(${NoRiskBackground})`, backgroundPosition: "center"}} height={"100%"}>
         <NavBar profile={profile} setProfile={setProfile}/>
         <Box height={"auto"}>
+          <Progress/>
           <StartButton profile={profile}/>
         </Box>
       </Box>

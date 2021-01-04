@@ -4,7 +4,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import {Avatar} from "@material-ui/core";
 import {readTextFile} from "tauri/api/fs";
 import {promisified} from "tauri/api/tauri";
-import {LauncherProfile} from "../interfaces/LauncherAccount";
+import {LauncherProfile} from "../../interfaces/LauncherAccount";
 
 interface ISwitchAccountMenu {
   open: boolean,
