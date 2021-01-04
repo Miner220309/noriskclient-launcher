@@ -39,6 +39,7 @@
       "exceptionDomain": ""
     },
     "allowlist": {
+      "all": true,
       "event": true,
       "notification": true,
       "readTextFile": true
