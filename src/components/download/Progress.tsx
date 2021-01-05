@@ -1,12 +1,7 @@
 import React from "react";
-import LinearProgress, {LinearProgressProps} from '@material-ui/core/LinearProgress';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import {Button} from "@material-ui/core";
+import {Box, Button, LinearProgress, LinearProgressProps, Typography} from "@material-ui/core";
 import axios from "axios";
-import {writeBinaryFile} from "tauri/api/fs";
 import {promisified} from "tauri/api/tauri";
-import {dialog} from "tauri/api/bundle";
 
 export const Progress = () => {
   const [progress, setProgress] = React.useState(0);
@@ -15,21 +10,22 @@ export const Progress = () => {
       <Button variant={"contained"} onClick={async () => {
         await axios({
           url: '/downloads/client/latest.jar',
-          method: "GET",
-          responseType: "blob", // important
-          onDownloadProgress: (progressEvent) => {
-            setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
-          }
+          method: 'GET',
+          responseType: 'arraybuffer', // Important
         }).then(async value => {
+          const buffer = value.data as ArrayBuffer;
+          const difference = new Uint8Array(buffer)
+          console.log(buffer)
+          console.log(difference)
           const mcDir = await promisified({cmd: "minecraftDir"});
-          console.log(mcDir)
-          console.log(value)
-          const xd = value.data as ArrayBuffer
-          console.log(xd)
-          await writeBinaryFile({
-            contents: value.data, path: mcDir + "/norisk/test.jar"
-          }, {});
-        })
+          return await promisified({
+            cmd: 'writeFile',
+            path: mcDir + "/norisk/client.jar",
+            contents: JSON.stringify(buffer),
+          }).then(result => {
+            console.log(result)
+          });
+        });
       }}>Test</Button>
       <LinearProgressWithLabel value={progress}/>
     </div>
