@@ -1,6 +1,6 @@
 import React from "react";
 import {Button, createStyles, makeStyles, Theme, useTheme,} from "@material-ui/core";
-import {invoke, promisified} from "tauri/api/tauri";
+import {promisified} from "tauri/api/tauri";
 import {PlayArrow} from "@material-ui/icons";
 import {LauncherProfile} from "../../interfaces/LauncherAccount";
 
@@ -31,7 +31,7 @@ export const StartButton = (props: Props) => {
         const mcDir = await promisified({cmd: "minecraftDir"});
         const program = await mcDir + "/versions/1.8.9-NoRiskClient/natives";
         console.log(program)
-        await invoke({
+        await promisified({
           cmd: 'startGame',
           program: "java",
           args: [
@@ -53,7 +53,8 @@ export const StartButton = (props: Props) => {
             `--userProperties`, profile.userProperites.length === 0 ? "" : profile.userProperites.length,
             `--userType`, profile.type,
             `--tweakClass=de.noriskclient.norisk.asm.ClassTweaker`
-          ]
+          ],
+          workingDir: mcDir
         })
       }}
       startIcon={<PlayArrow/>}

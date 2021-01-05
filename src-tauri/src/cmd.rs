@@ -4,17 +4,21 @@ use std::path::PathBuf;
 #[derive(Deserialize)]
 #[serde(tag = "cmd", rename_all = "camelCase")]
 pub enum Cmd {
-    MinecraftDir {
-        callback: String,
-        error: String,
-    },
+    #[serde(rename_all = "camelCase")]
+    MinecraftDir { callback: String, error: String },
+    #[serde(rename_all = "camelCase")]
     StartGame {
         program: String,
         args: Vec<String>,
+        working_dir: PathBuf,
+        callback: String,
+        error: String,
     },
+    #[serde(rename_all = "camelCase")]
     WriteBinFile {
         path: PathBuf,
-        content: Vec<u8>,
+        /// Base64 encoded contents
+        contents: String,
         callback: String,
         error: String,
     },

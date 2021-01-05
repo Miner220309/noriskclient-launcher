@@ -23,21 +23,33 @@ fn main() {
                 Cmd::MinecraftDir { callback, error } => {
                     tauri::execute_promise(webview, minecraft_dir, callback, error);
                 }
-                Cmd::StartGame { program, args } => {
-                    Command::new(program)
-                        .args(args)
-                        .spawn()
-                        .map_err(stringify)?;
-                }
+                Cmd::StartGame {
+                    program,
+                    args,
+                    working_dir,
+                    callback,
+                    error,
+                } => tauri::execute_promise(
+                    webview,
+                    move || {
+                        Command::new(program)
+                            .args(args)
+                            .current_dir(working_dir.canonicalize()?)
+                            .spawn()?;
+                        Ok(())
+                    },
+                    callback,
+                    error,
+                ),
                 Cmd::WriteBinFile {
                     path,
-                    content,
+                    contents,
                     callback,
                     error,
                 } => {
                     tauri::execute_promise(
                         webview,
-                        || Ok(fs::write(path, content)?),
+                        || Ok(fs::write(path, base64::decode(contents)?)?),
                         callback,
                         error,
                     );
