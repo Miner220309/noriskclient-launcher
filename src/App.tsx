@@ -2,12 +2,11 @@ import React, {useEffect, useState} from 'react';
 import './App.css'
 import {NavBar} from "./components/navbar/NavBar";
 import {StartButton} from "./components/action/StartButton";
-import {Box, createMuiTheme, ThemeProvider} from "@material-ui/core";
+import {Box, createMuiTheme, Grid, ThemeProvider} from "@material-ui/core";
 import {blue, cyan} from "@material-ui/core/colors";
 import {LauncherProfile} from "./interfaces/LauncherAccount";
 import {promisified} from "tauri/api/tauri";
 import {readTextFile} from "tauri/api/fs";
-import NoRiskBackground from "./images/main_bg.jpg"
 import {Progress} from "./components/download/Progress";
 
 const theme = createMuiTheme({
@@ -17,12 +16,31 @@ const theme = createMuiTheme({
   },
 });
 
+// @ts-ignore
+
 export const App = () => {
   const [profile, setProfile] = useState<LauncherProfile>({} as LauncherProfile);
   const [profiles, setProfiles] = useState<Array<LauncherProfile>>([]);
+  const [skinRender, setSkinRender] = useState<any>();
 
-  const switchProfile = () => {
-  }
+  useEffect(() => {
+    // @ts-ignore
+    const skin = new SkinRender({canvas: {width: "500", height: "500"}}, document.getElementById("3d-skin"))
+    if (profile?.minecraftProfile?.name) {
+      skin.render(profile.minecraftProfile.name, () => {
+        setSkinRender((prevState: any) => {
+          if (prevState !== undefined) {
+            prevState.style.display = 'none';
+          }
+          return skin._renderer.domElement
+        });
+        console.log("FINISHED")
+      })
+    }
+  }, [profile?.minecraftProfile?.name])
+
+  // @ts-ignore
+
 
   useEffect(() => {
     const fetchUserProfiles = async () => {
@@ -39,14 +57,26 @@ export const App = () => {
     fetchUserProfiles();
   }, []);
 
+
   return (
     <ThemeProvider theme={theme}>
-      <Box style={{backgroundImage: `url(${NoRiskBackground})`, backgroundPosition: "center"}} height={"100%"}>
+      <Box height={"100%"}>
         <NavBar profile={profile} setProfile={setProfile}/>
-        <Box height={"auto"}>
-          <Progress/>
-          <StartButton profile={profile}/>
-        </Box>
+        <Grid
+          container
+          direction="column"
+          justify="space-around"
+          alignItems="center">
+          <Grid item xs={12} sm={6}>
+            <Progress/>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <StartButton profile={profile}/>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+          </Grid>
+        </Grid>
+        <div className={"yo"} id={"3d-skin"}/>
       </Box>
     </ThemeProvider>
   )
