@@ -6,7 +6,7 @@
 mod cmd;
 
 use cmd::Cmd;
-use std::{env, process::Command};
+use std::{env, fs, process::Command};
 
 #[cfg(target_os = "windows")]
 use winapi::um::shellscalingapi::{SetProcessDpiAwareness, PROCESS_PER_MONITOR_DPI_AWARE};
@@ -28,6 +28,19 @@ fn main() {
                         .args(args)
                         .spawn()
                         .map_err(stringify)?;
+                }
+                Cmd::WriteBinFile {
+                    path,
+                    content,
+                    callback,
+                    error,
+                } => {
+                    tauri::execute_promise(
+                        webview,
+                        || Ok(fs::write(path, content)?),
+                        callback,
+                        error,
+                    );
                 }
             }
             Ok(())
