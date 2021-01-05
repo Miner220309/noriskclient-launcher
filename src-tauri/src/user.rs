@@ -36,7 +36,7 @@ pub struct LauncherAccount {
     pub minecraft_account: MinecraftAccount,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct MinecraftAccount {
     #[serde(rename = "id")]
     pub uuid: Uuid,

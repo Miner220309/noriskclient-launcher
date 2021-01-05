@@ -100,10 +100,11 @@ impl Cmd {
     pub fn handle(self, state: Arc<State>, webview: &mut Webview) -> Result<()> {
         match self {
             Cmd::ListAccounts { callback, error } => {
+                println!("{:?}", state.launcher_accounts.minecraft_accounts());
                 tauri::execute_promise(
                     webview,
                     move || {
-                        Ok(serde_json::to_string(
+                        Ok(serde_json::to_value(
                             &state.launcher_accounts.minecraft_accounts(),
                         )?)
                     },

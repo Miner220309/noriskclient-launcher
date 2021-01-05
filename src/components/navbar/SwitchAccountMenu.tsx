@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import {Avatar} from "@material-ui/core";
-import {promisified} from "tauri/api/tauri";
-import {LauncherProfile,} from "../interfaces/LauncherAccount";
+import { Avatar } from "@material-ui/core";
+import { promisified } from "tauri/api/tauri";
+import { LauncherProfile } from "../interfaces/LauncherAccount";
 
 interface ISwitchAccountMenu {
   open: boolean;
@@ -23,13 +23,12 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
   useEffect(() => {
     //workaround but it works
     const fetchAccounts = async () => {
-      promisified({cmd: "listAccounts"}).then((accs) => {
-        console.log(accs)
-        setAccounts(accs as Array<MinecraftAccount>)
-      });
-    }
+      const accs = await promisified({ cmd: "listAccounts" });
+      console.log(accs);
+      setAccounts(accs as Array<MinecraftAccount>);
+    };
     fetchAccounts();
-  }, [])
+  }, []);
 
   return (
     <Menu
@@ -47,7 +46,7 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
       open={props.open}
       onClose={props.handleClose}
     >
-      {accounts.map(account => {
+      {accounts.map((account) => {
         return (
           <MenuItem
             key={account.uuid}
@@ -62,9 +61,9 @@ export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
               src={"https://crafatar.com/avatars/" + account.uuid}
             />
             <h1>{account.name}</h1>
-          </MenuItem>)
+          </MenuItem>
+        );
       })}
     </Menu>
   );
-}
-
+};
