@@ -21,6 +21,12 @@ export const Progress = () => {
           path: mcDir + "/norisk/client.jar",
           contents: bytesToBase64(new Uint8Array(response.data)),
         });
+        await promisified({
+          cmd: "mergeZip",
+          src: mcDir + "/norisk/client.jar",
+          dest: "",
+          exclude: ""
+        });
       }}>Test</Button>
       <LinearProgressWithLabel value={progress}/>
     </div>

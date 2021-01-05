@@ -22,4 +22,13 @@ pub enum Cmd {
         callback: String,
         error: String,
     },
+    #[serde(rename_all = "camelCase")]
+    MergeZip {
+        src: PathBuf,
+        dest: PathBuf,
+        /// Regex for entries to exclude
+        exclude: Option<String>,
+        callback: String,
+        error: String,
+    },
 }
