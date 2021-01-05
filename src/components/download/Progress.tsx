@@ -2,6 +2,7 @@ import React from "react";
 import {Box, Button, LinearProgress, LinearProgressProps, Typography} from "@material-ui/core";
 import axios from "axios";
 import {promisified} from "tauri/api/tauri";
+import {writeBinaryFile} from "tauri/api/fs";
 import {bytesToBase64} from "byte-base64";
 
 export const Progress = () => {
@@ -9,18 +10,16 @@ export const Progress = () => {
   return (
     <div>
       <Button variant={"contained"} onClick={async () => {
-        await axios({
+        let response = await axios({
           url: '/downloads/client/latest.jar',
           method: 'GET',
           responseType: 'arraybuffer', // Important
-        }).then(async value => {
-          const mcDir = await promisified({cmd: "minecraftDir"});
-          const result = await promisified({
-            cmd: 'writeBinFile',
-            path: mcDir + "/norisk/client.jar",
-            contents: bytesToBase64(new Uint8Array(value.data)),
-          });
-          console.log(result);
+        });
+        const mcDir = await promisified({cmd: "minecraftDir"});
+        const result = await promisified({
+          cmd: 'writeBinFile',
+          path: mcDir + "/norisk/client.jar",
+          contents: bytesToBase64(new Uint8Array(response.data)),
         });
       }}>Test</Button>
       <LinearProgressWithLabel value={progress}/>
