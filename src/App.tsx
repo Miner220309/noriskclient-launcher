@@ -24,7 +24,7 @@ const theme = createMuiTheme({
 export const App = () => {
   const [profile, setProfile] = useState<LauncherProfile>({} as LauncherProfile);
   const [profiles, setProfiles] = useState<Array<LauncherProfile>>([]);
-  const [version, setVersion] = useState<Version>(MCVersions[0]);
+  const [version, setVersion] = useState<Version>(MCVersions[2]);
   const [skinRender, setSkinRender] = useState<any>();
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export const App = () => {
           <Grid item xs={12} sm={6}>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <VersionButton/>
+            <VersionButton setVersion={setVersion} version={version}/>
             <StartButton version={version} profile={profile}/>
           </Grid>
           <Grid item xs={12} sm={6}>

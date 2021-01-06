@@ -21,8 +21,8 @@ export const StartButton = (props: Props) => {
       onClick={async () => {
         const profile = props.profile;
         const version = props.version;
-        const mcDir = await promisified({cmd: "minecraftDir"});
-        const program = await mcDir + "/versions/1.8.9-NoRiskClient/natives";
+        const mcDir = await promisified({cmd: "minecraftDir"}) as string;
+        const natives = mcDir + "/versions/" + version.folderName + "/" + "natives";
         const mcJson = JSON.parse(await readTextFile(mcDir + version.jsonPath, {})) as MCJson;
         let libraries = "";
         mcJson.libraries.forEach(value => {
@@ -31,9 +31,11 @@ export const StartButton = (props: Props) => {
           const versionNumber = value.name.substr(value.name.lastIndexOf(":") + 1, value.name.length)
           libraries = libraries + (mcDir + "/libraries/" + path + value.name.substr(value.name.indexOf(":"), value.name.length).replaceAll(":", "/") + "/" + jarName + "-" + versionNumber + ".jar" + ";");
         })
-        libraries = libraries.substr(0, libraries.lastIndexOf(";"));
+        libraries = libraries + `${mcDir + version.jarPath}`;
         console.log(libraries)
         console.log(mcJson.mainClass)
+        console.log(version.libraries?.replaceAll("MCDIR", mcDir))
+        console.log(`${mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"}`)
         invoke({
           cmd: 'startGame',
           program: "java",
@@ -41,21 +43,21 @@ export const StartButton = (props: Props) => {
             `-Xms1024M`,
             `-Xmx1024M`,
             `-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump`,
-            `-Djava.library.path=${program}`,
+            `-Djava.library.path=${natives}`,
             `-Dminecraft.client.jar=${mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"}`,
             `-cp`,
-            `${libraries}`,
+            `${version.libraries?.replaceAll("MCDIR", mcDir)}`,
             `${mcJson.mainClass}`,
-            `--version`, "1.8.9-NoRiskClient",
+            `--version`, version.folderName,
             `--gameDir`, mcDir,
             `--assetsDir`, mcDir + "/assets",
             `--username`, profile.minecraftProfile.name,
-            `--assetIndex`, "1.8",
+            `--assetIndex`, version.assetIndex,
             `--uuid`, profile.minecraftProfile.id,
             `--accessToken`, profile.accessToken,
             `--userProperties`, profile.userProperites.length === 0 ? "" : profile.userProperites.length,
             `--userType`, profile.type,
-            `--tweakClass=de.noriskclient.norisk.asm.ClassTweaker`
+            `${version.tweakClass}`
           ],
           workingDir: mcDir,
           callback: "",

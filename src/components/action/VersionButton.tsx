@@ -1,8 +1,14 @@
 import React from "react";
 import {Button} from "@material-ui/core";
 import {SwitchVersion} from "../menu/SwitchVersion";
+import {Version} from "../../interfaces/Version";
 
-export const VersionButton = () => {
+interface Props {
+  version: Version
+  setVersion: (version: Version) => void;
+}
+
+export const VersionButton = (props: Props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -15,8 +21,8 @@ export const VersionButton = () => {
   };
   return (
     <>
-      <Button onClick={handleMenu} variant="contained" color="primary">Version</Button>
-      <SwitchVersion open={open} handleClose={handleClose} anchorEl={anchorEl}/>
+      <Button onClick={handleMenu} variant="contained" color="primary">{props.version.name}</Button>
+      <SwitchVersion setVersion={props.setVersion} open={open} handleClose={handleClose} anchorEl={anchorEl}/>
     </>
   )
 }
