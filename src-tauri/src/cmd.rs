@@ -5,6 +5,8 @@ use std::path::PathBuf;
 #[serde(tag = "cmd", rename_all = "camelCase")]
 pub enum Cmd {
     #[serde(rename_all = "camelCase")]
+    Os { callback: String, error: String },
+    #[serde(rename_all = "camelCase")]
     MinecraftDir { callback: String, error: String },
     #[serde(rename_all = "camelCase")]
     StartGame {

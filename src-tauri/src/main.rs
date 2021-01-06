@@ -23,6 +23,9 @@ fn main() {
     tauri::AppBuilder::new()
         .invoke_handler(move |webview, arg| {
             match serde_json::from_str(arg).map_err(stringify)? {
+                Cmd::Os { callback, error } => {
+                    tauri::execute_promise(webview, || Ok(env::consts::OS), callback, error);
+                }
                 Cmd::MinecraftDir { callback, error } => {
                     tauri::execute_promise(webview, minecraft_dir, callback, error);
                 }
