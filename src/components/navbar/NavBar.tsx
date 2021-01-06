@@ -5,7 +5,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import {Avatar, Typography} from '@material-ui/core';
-import {SwitchAccountMenu} from "./SwitchAccountMenu";
+import {SwitchAccount} from "../menu/SwitchAccount";
 import {LauncherProfile} from "../../interfaces/LauncherAccount";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -38,7 +38,6 @@ interface Props {
 
 export const NavBar = (props: Props) => {
   const classes = useStyles();
-  const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -76,8 +75,7 @@ export const NavBar = (props: Props) => {
                       :
                       "https://crafatar.com/avatars/54f04497-5693-48b9-b5de-70db3b6159d5"}/>
                 </IconButton>
-                <SwitchAccountMenu switchProfile={props?.setProfile} open={open}
-                                   handleClose={handleClose} anchorEl={anchorEl}/>
+                <SwitchAccount switchProfile={props?.setProfile} open={open} handleClose={handleClose} anchorEl={anchorEl}/>
               </>
             </div>
           )}

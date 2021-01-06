@@ -13,7 +13,7 @@ interface ISwitchAccountMenu {
   anchorEl: HTMLElement | null;
 }
 
-export const SwitchAccountMenu = (props: ISwitchAccountMenu) => {
+export const SwitchAccount = (props: ISwitchAccountMenu) => {
   const [accounts, setAccounts] = useState<Array<LauncherProfile>>();
   useEffect(() => {
     const fetchUserProfiles = async () => {

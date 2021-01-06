@@ -8,6 +8,9 @@ import {LauncherProfile} from "./interfaces/LauncherAccount";
 import {promisified} from "tauri/api/tauri";
 import {readTextFile} from "tauri/api/fs";
 import {Progress} from "./components/download/Progress";
+import {VersionButton} from "./components/action/VersionButton";
+import {Version} from "./interfaces/Version";
+import {MCVersions} from "./components/menu/SwitchVersion";
 
 const theme = createMuiTheme({
   palette: {
@@ -21,6 +24,7 @@ const theme = createMuiTheme({
 export const App = () => {
   const [profile, setProfile] = useState<LauncherProfile>({} as LauncherProfile);
   const [profiles, setProfiles] = useState<Array<LauncherProfile>>([]);
+  const [version, setVersion] = useState<Version>(MCVersions[0]);
   const [skinRender, setSkinRender] = useState<any>();
 
   useEffect(() => {
@@ -35,7 +39,7 @@ export const App = () => {
           }
           setInterval(() => {
             skin.playerModel.rotation.y += 0.01;
-          },10)
+          }, 10)
           console.log(skin.playerModel)
           return skin._renderer.domElement
         });
@@ -69,6 +73,7 @@ export const App = () => {
     <ThemeProvider theme={theme}>
       <Box height={"100%"}>
         <NavBar profile={profile} setProfile={setProfile}/>
+        <div className={"yo"} id={"3d-skin"}/>
         <Grid
           container
           direction="column"
@@ -77,12 +82,12 @@ export const App = () => {
           <Grid item xs={12} sm={6}>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <StartButton profile={profile}/>
+            <VersionButton/>
+            <StartButton version={version} profile={profile}/>
           </Grid>
           <Grid item xs={12} sm={6}>
           </Grid>
         </Grid>
-        <div className={"yo"} id={"3d-skin"}/>
         <Progress/>
       </Box>
     </ThemeProvider>
