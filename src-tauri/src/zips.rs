@@ -54,13 +54,20 @@ mod tests {
     use std::io::Cursor;
 
     #[test]
-    fn test_copy_entries() {
-        let mut src = mock_src().unwrap();
-        let mut dest = mock_dest().unwrap();
-        copy_entries(&mut src, &mut dest, None).unwrap();
+    fn test_copy_entries() -> Result<()> {
+        let mut src = mock_src()?;
+        let mut dest = mock_dest()?;
+        copy_entries(&mut src, &mut dest, None)?;
+
+        let mut dest = ZipArchive::new(dest.finish()?)?;
+        for i in 0..dest.len() {
+            let entry = dest.by_index(i)?;
+            println!("{}", entry.name());
+        }
+        Ok(())
     }
 
-    fn mock_src() -> Result<ZipArchive<impl Read + Seek>> {
+    fn mock_src() -> Result<ZipArchive<Cursor<Vec<u8>>>> {
         let mut writer = ZipWriter::new(Cursor::new(Vec::new()));
         let options = FileOptions::default();
         writer.add_directory("Test dir èëå/123.txt", options)?;
@@ -69,7 +76,7 @@ mod tests {
         Ok(ZipArchive::new(writer.finish()?)?)
     }
 
-    fn mock_dest() -> Result<ZipWriter<impl Write + Seek>> {
+    fn mock_dest() -> Result<ZipWriter<Cursor<Vec<u8>>>> {
         let mut writer = ZipWriter::new(Cursor::new(Vec::new()));
         let options = FileOptions::default();
         writer.add_directory("other dir/123.txt", options)?;
@@ -78,6 +85,6 @@ mod tests {
         writer.add_directory("stay there plsss", options)?;
         writer.start_file("stay there pls/stayyyy", options)?;
         writer.write(b"dont go away")?;
-        Ok(ZipWriter::new(writer.finish()?))
+        Ok(writer)
     }
 }

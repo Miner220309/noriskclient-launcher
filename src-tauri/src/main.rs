@@ -35,6 +35,8 @@ fn main() {
                 } => tauri::execute_promise(
                     webview,
                     move || {
+                        println!("{:?}", working_dir);
+                        println!("{:?}", working_dir.canonicalize()?);
                         Command::new(program)
                             .args(args)
                             .current_dir(working_dir.canonicalize()?)
