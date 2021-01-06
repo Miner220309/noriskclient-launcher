@@ -4,9 +4,12 @@
 )]
 
 mod cmd;
+mod zips;
 
 use cmd::Cmd;
+use regex::Regex;
 use std::{env, fs, process::Command};
+use tauri::Result;
 
 #[cfg(target_os = "windows")]
 use winapi::um::shellscalingapi::{SetProcessDpiAwareness, PROCESS_PER_MONITOR_DPI_AWARE};
@@ -54,6 +57,26 @@ fn main() {
                         error,
                     );
                 }
+                Cmd::MergeZip {
+                    src,
+                    dest,
+                    exclude,
+                    callback,
+                    error,
+                } => {
+                    tauri::execute_promise(
+                        webview,
+                        move || {
+                            zips::merge(
+                                src,
+                                dest,
+                                exclude.map(|ex| Regex::new(&ex)).transpose()?.as_ref(),
+                            )
+                        },
+                        callback,
+                        error,
+                    );
+                }
             }
             Ok(())
         })
@@ -65,7 +88,7 @@ fn stringify<T: ToString>(value: T) -> String {
     value.to_string()
 }
 
-fn minecraft_dir() -> tauri::Result<String> {
+fn minecraft_dir() -> Result<String> {
     Ok(if cfg!(target_os = "windows") {
         format!(r"{}\.minecraft", env::var("APPDATA")?)
     } else if cfg!(target_os = "macos") {
