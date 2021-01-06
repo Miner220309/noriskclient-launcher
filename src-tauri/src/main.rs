@@ -47,6 +47,13 @@ fn main() {
                     callback,
                     error,
                 ),
+                Cmd::FileExists {
+                    path,
+                    callback,
+                    error,
+                } => {
+                    tauri::execute_promise(webview, move || Ok(path.exists()), callback, error);
+                }
                 Cmd::WriteBinFile {
                     path,
                     contents,

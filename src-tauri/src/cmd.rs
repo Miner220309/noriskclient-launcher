@@ -17,6 +17,12 @@ pub enum Cmd {
         error: String,
     },
     #[serde(rename_all = "camelCase")]
+    FileExists {
+        path: PathBuf,
+        callback: String,
+        error: String,
+    },
+    #[serde(rename_all = "camelCase")]
     WriteBinFile {
         path: PathBuf,
         /// Base64 encoded contents
