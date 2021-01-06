@@ -27,13 +27,20 @@ export const App = () => {
     // @ts-ignore
     const skin = new SkinRender({canvas: {width: "500", height: "500"}}, document.getElementById("3d-skin"))
     if (profile?.minecraftProfile?.name) {
+      console.log(skin)
       skin.render(profile.minecraftProfile.name, () => {
         setSkinRender((prevState: any) => {
           if (prevState !== undefined) {
             prevState.style.display = 'none';
           }
+          setInterval(() => {
+            skin.playerModel.rotation.y += 0.01;
+          },10)
+          console.log(skin.playerModel)
           return skin._renderer.domElement
         });
+
+        console.log(skinRender)
         console.log("FINISHED")
       })
     }
@@ -68,7 +75,6 @@ export const App = () => {
           justify="space-around"
           alignItems="center">
           <Grid item xs={12} sm={6}>
-            <Progress/>
           </Grid>
           <Grid item xs={12} sm={6}>
             <StartButton profile={profile}/>
@@ -77,6 +83,7 @@ export const App = () => {
           </Grid>
         </Grid>
         <div className={"yo"} id={"3d-skin"}/>
+        <Progress/>
       </Box>
     </ThemeProvider>
   )
