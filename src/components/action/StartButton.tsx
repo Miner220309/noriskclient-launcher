@@ -1,26 +1,26 @@
 import React from "react";
-import {Button,} from "@material-ui/core";
-import {invoke, promisified} from "tauri/api/tauri";
-import {PlayArrow} from "@material-ui/icons";
-import {LauncherProfile} from "../../interfaces/LauncherAccount";
-import {Version} from "../../interfaces/Version";
-import {createDir, readTextFile} from "tauri/api/fs";
-import {MCJson} from "../../interfaces/MCJson";
+import { Button } from "@material-ui/core";
+import { invoke, promisified } from "tauri/api/tauri";
+import { PlayArrow } from "@material-ui/icons";
+import { LauncherProfile } from "../../interfaces/LauncherAccount";
+import { Version } from "../../interfaces/Version";
+import { createDir, readTextFile } from "tauri/api/fs";
+import { MCJson } from "../../interfaces/MCJson";
 import axios from "axios";
 import {bytesToBase64} from "byte-base64";
 import {dialog} from "tauri/api/bundle";
+import { bytesToBase64 } from "byte-base64";
 
 interface Props {
-  profile: LauncherProfile
-  version: Version
+  profile: LauncherProfile;
+  version: Version;
   setStatus: (status: string) => void;
-  status: string
+  status: string;
 }
 
 export const StartButton = (props: Props) => {
-
   const checkForInstalledNatives = async (mcDir: string, os: string) => {
-    props.setStatus(`Checking for ${props.version.assetIndex} Natives`)
+    props.setStatus(`Checking for ${props.version.assetIndex} Natives`);
     const [lwjgl, lwjglFolder] = getNatives(mcDir, os);
     const hasNatives = await promisified<boolean>({
       cmd: "fileExists",
@@ -70,7 +70,7 @@ export const StartButton = (props: Props) => {
     }
     nativePath = lwjglFolder + "/native/" + os;
     return [lwjgl, lwjglFolder, nativePath];
-  }
+  };
 
   const createNRCFolder = async (mcDir: string, os: string) => {
     return await createDir(mcDir + "/norisk").then(() => {
@@ -125,7 +125,9 @@ export const StartButton = (props: Props) => {
         `-Xmx1024M`,
         `-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump`,
         `-Djava.library.path=${nativePath}`,
-        `-Dminecraft.client.jar=${mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"}`,
+        `-Dminecraft.client.jar=${
+          mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"
+        }`,
         `-cp`,
         `${version.libraries?.replaceAll("MCDIR", mcDir)}`,
         `${version.mainClass}`,
@@ -143,8 +145,8 @@ export const StartButton = (props: Props) => {
       workingDir: mcDir,
       callback: "",
       error: "",
-    })
-  }
+    });
+  };
 
   const startGame = async () => {
     props.setStatus("Checking for Files");
@@ -178,9 +180,9 @@ export const StartButton = (props: Props) => {
       variant="contained"
       color="primary"
       onClick={startGame}
-      startIcon={<PlayArrow/>}>
+      startIcon={<PlayArrow />}
+    >
       {props.status}
     </Button>
   );
-}
-
+};
