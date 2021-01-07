@@ -1,15 +1,12 @@
 import React from "react";
-import { Button } from "@material-ui/core";
-import { invoke, promisified } from "tauri/api/tauri";
-import { PlayArrow } from "@material-ui/icons";
-import { LauncherProfile } from "../../interfaces/LauncherAccount";
-import { Version } from "../../interfaces/Version";
-import { createDir, readTextFile } from "tauri/api/fs";
-import { MCJson } from "../../interfaces/MCJson";
+import {Button} from "@material-ui/core";
+import {invoke, promisified} from "tauri/api/tauri";
+import {PlayArrow} from "@material-ui/icons";
+import {LauncherProfile} from "../../interfaces/LauncherAccount";
+import {Version} from "../../interfaces/Version";
+import {createDir} from "tauri/api/fs";
 import axios from "axios";
 import {bytesToBase64} from "byte-base64";
-import {dialog} from "tauri/api/bundle";
-import { bytesToBase64 } from "byte-base64";
 
 interface Props {
   profile: LauncherProfile;
@@ -30,7 +27,7 @@ export const StartButton = (props: Props) => {
       props.setStatus("Found natives")
     } else {
       props.setStatus("Installing natives")
-      downloadAndWriteFile(mcDir + "/norisk/" + lwjgl + ".zip", "/downloads/" + lwjgl + ".zip").then(async () => {
+      downloadAndWriteFile(mcDir + "/norisk/" + lwjgl + ".zip", "/downloads/" + lwjgl + ".zip", lwjgl).then(async () => {
           await promisified({
             cmd: "extractZip",
             src: mcDir + "/norisk/" + lwjgl + ".zip",
@@ -41,13 +38,30 @@ export const StartButton = (props: Props) => {
     }
   }
 
-  const downloadAndWriteFile = async (path: string, url: string) => {
+  const checkForInstalledLaunchWrapper = async (mcDir: string, os: string) => {
+    props.setStatus(`Checking for Launchwrapper`);
+    const hasLaunchWrapper = await promisified<boolean>({
+      cmd: "fileExists",
+      path: mcDir + "/libraries/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar"
+    })
+    if (hasLaunchWrapper) {
+      props.setStatus("Found launchwrapper")
+    } else {
+      props.setStatus("Installing launchwrapper")
+      // @ts-ignore
+      return await createDir(mcDir + "/libraries/net/minecraft/launchwrapper/1.12/", {recursive: true}).then(async () => {
+        return await downloadAndWriteFile(mcDir + "/libraries/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar", "/downloads/launchwrapper-1.12.jar", "Launchwrapper");
+      })
+    }
+  }
+
+  const downloadAndWriteFile = async (path: string, url: string, toDownload: string) => {
     let response = await axios({
       url: url,
       method: 'GET',
       responseType: 'arraybuffer',
       onDownloadProgress: progressEvent => {
-        props.setStatus(`Downloading ${Math.round((progressEvent.loaded * 100) / progressEvent.total)}%`)
+        props.setStatus(`Downloading ${toDownload} ${Math.round((progressEvent.loaded * 100) / progressEvent.total)}%`)
       }
     });
     return await promisified({
@@ -73,18 +87,43 @@ export const StartButton = (props: Props) => {
   };
 
   const createNRCFolder = async (mcDir: string, os: string) => {
-    return await createDir(mcDir + "/norisk").then(() => {
-      props.setStatus("Creating norisk folder")
-    }).catch(() => {
-      props.setStatus("Found norisk folder")
-    }).finally(async () => {
-      return await createDir(mcDir + "/norisk/natives").then(() => {
-        props.setStatus("Creating natives folder")
-      }).catch(() => {
-        props.setStatus("Found natives folder")
-      }).finally(async () => {
-        return await checkForInstalledNatives(mcDir, os);
+    // @ts-ignore
+    return await createDir(mcDir + "/norisk/natives", {recursive: true}).then(async () => {
+      props.setStatus("Checking for norisk folder")
+      return Promise.all([await checkForInstalledNatives(mcDir, os), await checkForInstalledLaunchWrapper(mcDir, os)])
+    })
+  }
+
+  const startNoRiskForge = async (mcDir: string) => {
+    // @ts-ignore
+    return await createDir(mcDir + "/mods/1.8.9", {recursive: true}).then(async () => {
+      props.setStatus("Checking for forge mods folder")
+      const hasNoRiskMod = await promisified<boolean>({
+        cmd: "fileExists",
+        path: mcDir + "/mods/1.8.9/NoRiskClient.jar",
       })
+      const hasForgeLoader = await promisified<boolean>({
+        cmd: "fileExists",
+        path: mcDir + "/libraries/de/noriskclient/forge/1.8.9/forge-1.8.9.jar",
+      })
+      if (hasNoRiskMod && hasForgeLoader) {
+        //TODO check for updates
+      } else {
+        let noriskModDownload;
+        let optifineModDownload;
+        let forgeLoaderDownload;
+        if (!hasNoRiskMod) {
+          noriskModDownload = await downloadAndWriteFile(mcDir + "/mods/1.8.9/NoRiskClient-1.8.9.jar", "/downloads/client/latest.jar", "NoRiskClient-Forge")
+          optifineModDownload = await downloadAndWriteFile(mcDir + "/mods/1.8.9/Optifine-1.8.9.jar", "/downloads/optifine_1.8.9.zip", "Optifine")
+        }
+        if (!hasForgeLoader) {
+          // @ts-ignore
+          forgeLoaderDownload = await createDir(mcDir + "/libraries/de/noriskclient/forge/1.8.9", {recursive: true}).then(async () => {
+            return await downloadAndWriteFile(mcDir + "/libraries/de/noriskclient/forge/1.8.9/forge-1.8.9.jar", "downloads/forge_1.8.9.jar", "Forge 1.8.9");
+          })
+        }
+        return Promise.all([noriskModDownload, optifineModDownload, forgeLoaderDownload]);
+      }
     })
   }
 
@@ -105,10 +144,10 @@ export const StartButton = (props: Props) => {
       } else {
         // @ts-ignore
         return await createDir(mcDir + "/versions/1.8.9-NoRiskClient/", {recursive: true}).then(async () => {
-          await downloadAndWriteFile(mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.json", "downloads/client/1.8.9-NoRiskClient.json");
-          await downloadAndWriteFile(mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar", "downloads/mc_1.8.9.jar");
+          await downloadAndWriteFile(mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.json", "downloads/client/1.8.9-NoRiskClient.json", "NoRiskClient JSON");
+          await downloadAndWriteFile(mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar", "downloads/mc_1.8.9.jar", "Minecraft 1.8.9");
         }).then(async () => {
-          return downloadAndWriteFile(mcDir + "/libraries/de/noriskclient/NoRiskClient/1.8.9/NoRiskClient-1.8.9.jar", "/downloads/client/latest.jar")
+          return downloadAndWriteFile(mcDir + "/libraries/de/noriskclient/NoRiskClient/1.8.9/NoRiskClient-1.8.9.jar", "/downloads/client/latest.jar", "NoRiskClient 1.8.9")
         })
       }
     })
@@ -165,10 +204,12 @@ export const StartButton = (props: Props) => {
     await createNRCFolder(mcDir, OS).then(() => {
       if (version.name === "1.8.9 Standalone") {
         startNoRiskStandAlone(mcDir).then(() => {
-          dialog.open({})
-          dialog.save({})
-         // launchMinecraft(nativePath, mcDir)
+          launchMinecraft(nativePath, mcDir)
         });
+      } else if (version.name === "1.8.9 Forge") {
+        startNoRiskForge(mcDir).then(() => {
+          launchMinecraft(nativePath, mcDir);
+        })
       }
     });
     props.setStatus("Starting Game")
@@ -180,7 +221,7 @@ export const StartButton = (props: Props) => {
       variant="contained"
       color="primary"
       onClick={startGame}
-      startIcon={<PlayArrow />}
+      startIcon={<PlayArrow/>}
     >
       {props.status}
     </Button>
