@@ -9,7 +9,6 @@ import {MCJson} from "../../interfaces/MCJson";
 import axios from "axios";
 import {bytesToBase64} from "byte-base64";
 
-
 interface Props {
   profile: LauncherProfile
   version: Version
@@ -18,6 +17,53 @@ interface Props {
 }
 
 export const StartButton = (props: Props) => {
+
+  const checkForInstalledNatives = async (mcDir: string, os: string) => {
+    props.setStatus(`Checking for ${props.version.assetIndex} Natives`)
+    const [lwjgl, lwjglFolder] = getNatives(mcDir, os);
+    await promisified<boolean>({
+      cmd: "fileExists",
+      path: lwjglFolder
+    }).then(async hasNatives => {
+      if (hasNatives) {
+        props.setStatus("Found natives")
+      } else {
+        props.setStatus("Installing natives")
+        let response = await axios({
+          url: "/downloads/" + lwjgl + ".zip",
+          method: 'GET',
+          responseType: 'arraybuffer', // Important
+        });
+        await promisified({
+          cmd: 'writeBinFile',
+          path: mcDir + "/norisk/" + lwjgl + ".zip",
+          contents: bytesToBase64(new Uint8Array(response.data)),
+        }).then(async value => {
+          //TODO EXTRACT FILE
+          await promisified({
+            cmd: "extractZip",
+            src: mcDir + "/norisk/" + lwjgl + ".zip",
+            dest: mcDir + "/norisk/natives"
+          })
+        });
+      }
+    })
+  }
+
+  const getNatives = (mcDir: string, os: string) => {
+    let lwjglFolder = "";
+    let lwjgl = "";
+    let nativePath = "";
+    if (props.version.assetIndex === "1.8") {
+      lwjgl = "lwjgl-2.9.3";
+      lwjglFolder = mcDir + "/norisk/natives/" + lwjgl;
+    } else if (props.version.assetIndex === "1.16") {
+      lwjgl = "lwjgl-3.2.2";
+      lwjglFolder = mcDir + "/norisk/natives/" + lwjgl;
+    }
+    nativePath = lwjglFolder + "/native/" + os;
+    return [lwjgl, lwjglFolder, nativePath];
+  }
 
   const createNRCFolder = async (mcDir: string, os: string) => {
     await createDir(mcDir + "/norisk").then(() => {
@@ -30,28 +76,7 @@ export const StartButton = (props: Props) => {
     }).catch(() => {
       props.setStatus("Found natives folder")
     })
-
-    if (props.version.assetIndex === "1.8") {
-      props.setStatus("Checking for 1.8 Natives")
-      await promisified<boolean>({cmd: "fileExists",path: mcDir + "/norisk/natives/native/"+os}).then(async value => {
-        if (value) {
-          props.setStatus("Found natives")
-        } else {
-          props.setStatus("Installing natives")
-          let response = await axios({
-            url: 'https://versaweb.dl.sourceforge.net/project/java-game-lib/Official%20Releases/LWJGL%202.8.2/lwjgl-2.8.2.zip',
-            method: 'GET',
-            responseType: 'arraybuffer', // Important
-          });
-          console.log(response)
-         /* const result = await promisified({
-            cmd: 'writeBinFile',
-            path: mcDir + "/norisk/client.jar",
-            contents: bytesToBase64(new Uint8Array(response.data)),
-          }); */
-        }
-      })
-    }
+    await checkForInstalledNatives(mcDir, os);
   }
 
   const startGame = async () => {
@@ -67,7 +92,8 @@ export const StartButton = (props: Props) => {
       return value;
     });
     await createNRCFolder(mcDir, OS);
-    const natives = mcDir + "/versions/" + version.folderName + "/" + "natives";
+    const [lwjgl, lwjglFolder, nativePath] = getNatives(mcDir, OS);
+    console.log(lwjgl, lwjglFolder, nativePath)
     const mcJson = JSON.parse(await readTextFile(mcDir + version.jsonPath, {})) as MCJson;
     let libraries = "";
     mcJson.libraries.forEach(value => {
@@ -80,36 +106,36 @@ export const StartButton = (props: Props) => {
     console.log(libraries)
     console.log(mcJson.mainClass)
     console.log(version.libraries?.replaceAll("MCDIR", mcDir))
-    console.log(`${mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"}`)
+    console.log(nativePath)
     console.log(profile.accessToken)
     console.log(profile.minecraftProfile.name)
-    /*  invoke({
-        cmd: 'startGame',
-        program: "java",
-        args: [
-          `-Xms1024M`,
-          `-Xmx1024M`,
-          `-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump`,
-          `-Djava.library.path=${natives}`,
-          `-Dminecraft.client.jar=${mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"}`,
-          `-cp`,
-          `${version.libraries?.replaceAll("MCDIR", mcDir)}`,
-          `${mcJson.mainClass}`,
-          `--version`, version.folderName,
-          `--gameDir`, mcDir,
-          `--assetsDir`, mcDir + "/assets",
-          `--username`, profile.minecraftProfile.name,
-          `--assetIndex`, version.assetIndex,
-          `--uuid`, profile.minecraftProfile.id,
-          `--accessToken`, profile.accessToken,
-          `--userProperties`, profile.userProperites.length === 0 ? "" : profile.userProperites.length,
-          `--userType`, profile.type,
-          `${version.tweakClass}`
-        ],
-        workingDir: mcDir,
-        callback: "",
-        error: "",
-      }) */
+    invoke({
+      cmd: 'startGame',
+      program: "java",
+      args: [
+        `-Xms1024M`,
+        `-Xmx1024M`,
+        `-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump`,
+        `-Djava.library.path=${nativePath}`,
+        `-Dminecraft.client.jar=${mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"}`,
+        `-cp`,
+        `${version.libraries?.replaceAll("MCDIR", mcDir)}`,
+        `${mcJson.mainClass}`,
+        `--version`, version.folderName,
+        `--gameDir`, mcDir,
+        `--assetsDir`, mcDir + "/assets",
+        `--username`, profile.minecraftProfile.name,
+        `--assetIndex`, version.assetIndex,
+        `--uuid`, profile.minecraftProfile.id,
+        `--accessToken`, profile.accessToken,
+        `--userProperties`, profile.userProperites.length === 0 ? "" : profile.userProperites.length,
+        `--userType`, profile.type,
+        `${version.tweakClass}`
+      ],
+      workingDir: mcDir,
+      callback: "",
+      error: "",
+    })
   }
 
   return (
