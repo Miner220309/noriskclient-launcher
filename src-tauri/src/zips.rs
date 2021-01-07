@@ -10,6 +10,10 @@ use zip::{
     write::{FileOptions, ZipWriter},
 };
 
+pub fn extract<S: AsRef<Path>, D: AsRef<Path>>(src: S, dest: D) -> Result<()> {
+    Ok(ZipArchive::new(File::open(src)?)?.extract(dest)?)
+}
+
 pub fn merge<S: AsRef<Path>, D: AsRef<Path>>(
     src: S,
     dest: D,

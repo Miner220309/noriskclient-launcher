@@ -31,6 +31,13 @@ pub enum Cmd {
         error: String,
     },
     #[serde(rename_all = "camelCase")]
+    ExtractZip {
+        src: PathBuf,
+        dest: PathBuf,
+        callback: String,
+        error: String,
+    },
+    #[serde(rename_all = "camelCase")]
     MergeZip {
         src: PathBuf,
         dest: PathBuf,

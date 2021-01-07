@@ -67,6 +67,14 @@ fn main() {
                         error,
                     );
                 }
+                Cmd::ExtractZip {
+                    src,
+                    dest,
+                    callback,
+                    error,
+                } => {
+                    tauri::execute_promise(webview, || zips::extract(src, dest), callback, error);
+                }
                 Cmd::MergeZip {
                     src,
                     dest,
