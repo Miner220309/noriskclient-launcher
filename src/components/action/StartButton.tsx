@@ -36,6 +36,8 @@ export const StartButton = (props: Props) => {
         console.log(mcJson.mainClass)
         console.log(version.libraries?.replaceAll("MCDIR", mcDir))
         console.log(`${mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"}`)
+        console.log(profile.accessToken)
+        console.log(profile.minecraftProfile.name)
         invoke({
           cmd: 'startGame',
           program: "java",
