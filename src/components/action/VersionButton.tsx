@@ -2,6 +2,7 @@ import React from "react";
 import {Button} from "@material-ui/core";
 import {SwitchVersion} from "../menu/SwitchVersion";
 import {Version} from "../../interfaces/Version";
+import {setFlagsFromString} from "v8";
 
 interface Props {
   version: Version

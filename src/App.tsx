@@ -23,35 +23,29 @@ const theme = createMuiTheme({
 
 export const App = () => {
   const [profile, setProfile] = useState<LauncherProfile>({} as LauncherProfile);
+  const [status,setStatus] = useState("Start");
   const [profiles, setProfiles] = useState<Array<LauncherProfile>>([]);
-  const [version, setVersion] = useState<Version>(MCVersions[2]);
+  const [version, setVersion] = useState<Version>(MCVersions[0]);
   const [skinRender, setSkinRender] = useState<any>();
 
   useEffect(() => {
     // @ts-ignore
     const skin = new SkinRender({canvas: {width: "500", height: "500"}}, document.getElementById("3d-skin"))
     if (profile?.minecraftProfile?.name) {
-      console.log(skin)
       skin.render(profile.minecraftProfile.name, () => {
         setSkinRender((prevState: any) => {
           if (prevState !== undefined) {
             prevState.style.display = 'none';
           }
+          //TODO das hier fixxen
           setInterval(() => {
             skin.playerModel.rotation.y += 0.01;
           }, 10)
-          console.log(skin.playerModel)
           return skin._renderer.domElement
         });
-
-        console.log(skinRender)
-        console.log("FINISHED")
       })
     }
   }, [profile?.minecraftProfile?.name])
-
-  // @ts-ignore
-
 
   useEffect(() => {
     const fetchUserProfiles = async () => {
@@ -82,8 +76,8 @@ export const App = () => {
           <Grid item xs={12} sm={6}>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <VersionButton setVersion={setVersion} version={version}/>
-            <StartButton version={version} profile={profile}/>
+            <VersionButton  setVersion={setVersion} version={version}/>
+            <StartButton setStatus={setStatus} status={status} version={version} profile={profile}/>
           </Grid>
           <Grid item xs={12} sm={6}>
           </Grid>
