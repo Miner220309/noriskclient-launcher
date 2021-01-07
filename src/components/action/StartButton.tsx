@@ -8,6 +8,7 @@ import {createDir, readTextFile} from "tauri/api/fs";
 import {MCJson} from "../../interfaces/MCJson";
 import axios from "axios";
 import {bytesToBase64} from "byte-base64";
+import {dialog} from "tauri/api/bundle";
 
 interface Props {
   profile: LauncherProfile
@@ -21,33 +22,39 @@ export const StartButton = (props: Props) => {
   const checkForInstalledNatives = async (mcDir: string, os: string) => {
     props.setStatus(`Checking for ${props.version.assetIndex} Natives`)
     const [lwjgl, lwjglFolder] = getNatives(mcDir, os);
-    await promisified<boolean>({
+    const hasNatives = await promisified<boolean>({
       cmd: "fileExists",
       path: lwjglFolder
-    }).then(async hasNatives => {
-      if (hasNatives) {
-        props.setStatus("Found natives")
-      } else {
-        props.setStatus("Installing natives")
-        let response = await axios({
-          url: "/downloads/" + lwjgl + ".zip",
-          method: 'GET',
-          responseType: 'arraybuffer', // Important
-        });
-        await promisified({
-          cmd: 'writeBinFile',
-          path: mcDir + "/norisk/" + lwjgl + ".zip",
-          contents: bytesToBase64(new Uint8Array(response.data)),
-        }).then(async value => {
-          //TODO EXTRACT FILE
+    })
+    if (hasNatives) {
+      props.setStatus("Found natives")
+    } else {
+      props.setStatus("Installing natives")
+      downloadAndWriteFile(mcDir + "/norisk/" + lwjgl + ".zip", "/downloads/" + lwjgl + ".zip").then(async () => {
           await promisified({
             cmd: "extractZip",
             src: mcDir + "/norisk/" + lwjgl + ".zip",
             dest: mcDir + "/norisk/natives"
           })
-        });
+        }
+      )
+    }
+  }
+
+  const downloadAndWriteFile = async (path: string, url: string) => {
+    let response = await axios({
+      url: url,
+      method: 'GET',
+      responseType: 'arraybuffer',
+      onDownloadProgress: progressEvent => {
+        props.setStatus(`Downloading ${Math.round((progressEvent.loaded * 100) / progressEvent.total)}%`)
       }
-    })
+    });
+    return await promisified({
+      cmd: 'writeBinFile',
+      path: path,
+      contents: bytesToBase64(new Uint8Array(response.data)),
+    });
   }
 
   const getNatives = (mcDir: string, os: string) => {
@@ -66,50 +73,51 @@ export const StartButton = (props: Props) => {
   }
 
   const createNRCFolder = async (mcDir: string, os: string) => {
-    await createDir(mcDir + "/norisk").then(() => {
+    return await createDir(mcDir + "/norisk").then(() => {
       props.setStatus("Creating norisk folder")
     }).catch(() => {
       props.setStatus("Found norisk folder")
+    }).finally(async () => {
+      return await createDir(mcDir + "/norisk/natives").then(() => {
+        props.setStatus("Creating natives folder")
+      }).catch(() => {
+        props.setStatus("Found natives folder")
+      }).finally(async () => {
+        return await checkForInstalledNatives(mcDir, os);
+      })
     })
-    await createDir(mcDir + "/norisk/natives").then(() => {
-      props.setStatus("Creating natives folder")
-    }).catch(() => {
-      props.setStatus("Found natives folder")
-    })
-    await checkForInstalledNatives(mcDir, os);
   }
 
-  const startGame = async () => {
-    props.setStatus("Checking for Files");
+  const startNoRiskStandAlone = async (mcDir: string) => {
+    // @ts-ignore
+    return await createDir(mcDir + "/libraries/de/noriskclient/NoRiskClient/1.8.9", {recursive: true}).then(async () => {
+      props.setStatus("Checking for norisk-Libraries")
+      const hasLibrary = await promisified<boolean>({
+        cmd: "fileExists",
+        path: mcDir + "/libraries/de/noriskclient/NoRiskClient/1.8.9/1.8.9-NoRiskClient.jar",
+      })
+      const hasVersionsFolder = await promisified<boolean>({
+        cmd: "fileExists",
+        path: mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar",
+      })
+      if (hasLibrary && hasVersionsFolder) {
+        //TODO check for updates
+      } else {
+        // @ts-ignore
+        return await createDir(mcDir + "/versions/1.8.9-NoRiskClient/", {recursive: true}).then(async () => {
+          await downloadAndWriteFile(mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.json", "downloads/client/1.8.9-NoRiskClient.json");
+          await downloadAndWriteFile(mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar", "downloads/mc_1.8.9.jar");
+        }).then(async () => {
+          return downloadAndWriteFile(mcDir + "/libraries/de/noriskclient/NoRiskClient/1.8.9/NoRiskClient-1.8.9.jar", "/downloads/client/latest.jar")
+        })
+      }
+    })
+  }
+
+  const launchMinecraft = async (nativePath: string, mcDir: string) => {
     const profile = props.profile;
     const version = props.version;
-    const OS = await promisified<string>({cmd: "os"}).then((value) => {
-      props.setStatus(value)
-      return value;
-    });
-    const mcDir = await promisified<string>({cmd: "minecraftDir"}).then((value) => {
-      props.setStatus("Found .minecraft folder")
-      return value;
-    });
-    await createNRCFolder(mcDir, OS);
-    const [lwjgl, lwjglFolder, nativePath] = getNatives(mcDir, OS);
-    console.log(lwjgl, lwjglFolder, nativePath)
-    const mcJson = JSON.parse(await readTextFile(mcDir + version.jsonPath, {})) as MCJson;
-    let libraries = "";
-    mcJson.libraries.forEach(value => {
-      const path = value.name.substr(0, value.name.indexOf(":")).replaceAll(".", "/");
-      const jarName = value.name.substr(value.name.indexOf(":") + 1, value.name.length).substr(0, value.name.substr(value.name.indexOf(":") + 1, value.name.length).indexOf(":"));
-      const versionNumber = value.name.substr(value.name.lastIndexOf(":") + 1, value.name.length)
-      libraries = libraries + (mcDir + "/libraries/" + path + value.name.substr(value.name.indexOf(":"), value.name.length).replaceAll(":", "/") + "/" + jarName + "-" + versionNumber + ".jar" + ";");
-    })
-    libraries = libraries + `${mcDir + version.jarPath}`;
-    console.log(libraries)
-    console.log(mcJson.mainClass)
-    console.log(version.libraries?.replaceAll("MCDIR", mcDir))
-    console.log(nativePath)
-    console.log(profile.accessToken)
-    console.log(profile.minecraftProfile.name)
-    invoke({
+    await invoke({
       cmd: 'startGame',
       program: "java",
       args: [
@@ -120,7 +128,7 @@ export const StartButton = (props: Props) => {
         `-Dminecraft.client.jar=${mcDir + "/versions/1.8.9-NoRiskClient/1.8.9-NoRiskClient.jar"}`,
         `-cp`,
         `${version.libraries?.replaceAll("MCDIR", mcDir)}`,
-        `${mcJson.mainClass}`,
+        `${version.mainClass}`,
         `--version`, version.folderName,
         `--gameDir`, mcDir,
         `--assetsDir`, mcDir + "/assets",
@@ -136,6 +144,33 @@ export const StartButton = (props: Props) => {
       callback: "",
       error: "",
     })
+  }
+
+  const startGame = async () => {
+    props.setStatus("Checking for Files");
+    const profile = props.profile;
+    const version = props.version;
+
+    const OS = await promisified<string>({cmd: "os"}).then((value) => {
+      props.setStatus(value)
+      return value;
+    });
+    const mcDir = await promisified<string>({cmd: "minecraftDir"}).then((value) => {
+      props.setStatus("Found .minecraft folder")
+      return value;
+    });
+    const [lwjgl, lwjglFolder, nativePath] = getNatives(mcDir, OS);
+    await createNRCFolder(mcDir, OS).then(() => {
+      if (version.name === "1.8.9 Standalone") {
+        startNoRiskStandAlone(mcDir).then(() => {
+          dialog.open({})
+          dialog.save({})
+         // launchMinecraft(nativePath, mcDir)
+        });
+      }
+    });
+    props.setStatus("Starting Game")
+
   }
 
   return (

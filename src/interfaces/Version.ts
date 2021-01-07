@@ -1,5 +1,6 @@
 export interface Version {
   name: string,
+  mainClass: string,
   folderName: string;
   jsonPath: string,
   assetIndex: string
