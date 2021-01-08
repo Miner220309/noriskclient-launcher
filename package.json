@@ -32,8 +32,10 @@
   },
   "scripts": {
     "dev": "run-p react-dev tauri-dev",
+    "build": "run-s react-build tauri-build",
     "tauri": "tauri",
     "tauri-dev": "tauri dev",
+    "tauri-build": "tauri build",
     "react-dev": "react-scripts start",
     "react-build": "react-scripts build",
     "react-test": "react-scripts test",
